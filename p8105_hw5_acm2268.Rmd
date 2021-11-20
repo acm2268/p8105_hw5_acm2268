@@ -139,6 +139,47 @@ results_df %>%
 
 ```
 
+# Question 2
+
+## Creating a data frame with the files
+
+```{r q2_file_df}
+
+file_vec = 
+  list.files(path = "./data/study_data",
+             pattern = NULL,
+             all.files = TRUE,
+             full.names = FALSE,
+             ignore.case = FALSE,
+             include.dirs = FALSE,
+             no.. = FALSE)
+
+study_df =  
+  tibble(
+    file_name = file_vec
+  )
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
