@@ -49,8 +49,64 @@ homicide_df =
   filter(city_state != "TulsaAL") %>%
   view()
 
+```
+
+## Baltimore, MD
+
+```{r q1_baltimore}
+
+baltimore_df = 
+  homicide_df %>%
+  filter(city_state == "BaltimoreMD") %>%
+  view()
+
+baltimore_summary = baltimore_df %>%
+  summarize(
+    unsolved = sum(resolution == "unsolved"),
+    n = n()
+  )
+
+baltimore_test = prop.test(
+  x = baltimore_summary %>% pull(unsolved), 
+  n = baltimore_summary %>% pull(n)
+)
+
+baltimore_test %>%
+  broom::tidy()
 
 ```
+
+## Iteration test
+
+First, write a function and test it.
+
+```{r q1_iteration}
+
+prop_test_function = function(city_df) {
+  
+  city_summary = city_df %>%
+  summarize(
+    unsolved = sum(resolution == "unsolved"),
+    n = n()
+  )
+
+city_test = prop.test(
+  x = city_summary %>% pull(unsolved), 
+  n = city_summary %>% pull(n)
+)
+
+return(city_test)
+  
+}
+
+prop_test_function(baltimore_df)
+
+hom
+
+
+```
+
+## Iterate across cities
 
 
 
