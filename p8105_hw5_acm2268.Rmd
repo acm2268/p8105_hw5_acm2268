@@ -146,18 +146,33 @@ results_df %>%
 ```{r q2_file_df}
 
 file_vec = 
-  list.files(path = "./data/study_data",
-             pattern = NULL,
-             all.files = TRUE,
-             full.names = FALSE,
-             ignore.case = FALSE,
-             include.dirs = FALSE,
-             no.. = FALSE)
+  list.files("./data/study_data",
+             full.names = TRUE)
 
 study_df =  
   tibble(
     file_name = file_vec
-  )
+  ) %>%
+  mutate(data = purrr::map(.x = file_name, ~read_csv(.x))) %>%
+  unnest(data)
+
+```
+
+## Write a function to read in the files and test it
+
+```{r q2_file_function}
+
+import_function = function(file_name) {
+  
+data_import = read_csv(file_name)
+
+return(data_import)
+  
+}
+
+import_function(study_df)
+
+
 
 ```
 
