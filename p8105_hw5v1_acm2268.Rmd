@@ -1,0 +1,202 @@
+---
+title: "p8105_hw5_acm2268"
+author: "Amanda Miles"
+date: "11/19/2021"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rvest)
+library(dplyr)
+library(viridis)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+```
+
+# Question 1
+
+```{r q1_data}
+
+homicide_df = 
+  read_csv("./data/homicide-data.csv", na = c("", "Unknown")) %>% 
+  mutate(
+    city_state = str_c(city, state),
+    resolution = case_when(
+      disposition == "Closed without arrest" ~ "unsolved",
+      disposition == "Open/No arrest" ~ "unsolved",
+      disposition == "Closed by arrest" ~ "solved"
+    )
+  ) %>% 
+  relocate(city_state) %>%
+  filter(city_state != "TulsaAL") %>%
+  view()
+
+```
+
+## Baltimore, MD
+
+```{r q1_baltimore}
+
+baltimore_df = 
+  homicide_df %>%
+  filter(city_state == "BaltimoreMD") %>%
+  view()
+
+baltimore_summary = baltimore_df %>%
+  summarize(
+    unsolved = sum(resolution == "unsolved"),
+    n = n()
+  )
+
+baltimore_test = prop.test(
+  x = baltimore_summary %>% pull(unsolved), 
+  n = baltimore_summary %>% pull(n)
+)
+
+baltimore_test %>%
+  broom::tidy()
+
+```
+
+## Iteration test
+
+First, write a function and test it.
+
+```{r q1_iteration}
+
+prop_test_function = function(city_df) {
+  
+  city_summary = city_df %>%
+  summarize(
+    unsolved = sum(resolution == "unsolved"),
+    n = n()
+  )
+
+city_test = prop.test(
+  x = city_summary %>% pull(unsolved), 
+  n = city_summary %>% pull(n)
+)
+
+return(city_test)
+  
+}
+
+prop_test_function(baltimore_df)
+
+
+```
+
+## Iterate across cities
+
+First, create a city-specific data frame using the nest function.
+
+```{r q1_city_iteration}
+
+results_df = homicide_df %>%
+  nest(data = uid:resolution) %>%
+  mutate(
+    test_results = map(data, prop_test_function),
+    tidy_results = map(test_results, broom::tidy)
+  ) %>%
+  select(city_state, tidy_results) %>%
+  unnest(tidy_results) %>%
+  select(city_state, estimate, starts_with("conf")) %>%
+  view()
+
+```
+
+## Plot with error bars showing estimates and CIs
+
+```{r q1_plot}
+
+results_df %>%
+  mutate(
+    city_state = fct_reorder(city_state, estimate)
+  ) %>%
+  ggplot(aes(x = city_state, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+
+```
+
+# Question 2
+
+## Creating a data frame with the files
+
+```{r q2_file_df}
+
+file_vec = 
+  list.files("./data/study_data",
+             full.names = TRUE)
+
+study_df =  
+  tibble(
+    file_name = file_vec
+  ) %>%
+  mutate(data = purrr::map(.x = file_name, ~read_csv(.x))) %>%
+  unnest(data)
+
+```
+
+## Write a function to read in the files and test it
+
+```{r q2_file_function}
+
+import_function = function(file_name) {
+  
+data_import = read_csv(file_name)
+
+return(data_import)
+  
+}
+
+import_function(study_df)
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
