@@ -141,7 +141,7 @@ results_df %>%
 
 # Question 2
 
-## Creating a data frame with the files
+## Creating a data frame with the files and participant data
 
 ```{r q2_file_df}
 
@@ -154,26 +154,25 @@ study_df =
     file_name = file_vec
   ) %>%
   mutate(data = purrr::map(.x = file_name, ~read_csv(.x))) %>%
-  unnest(data)
+  unnest(data) %>% view()
 
 ```
 
-## Write a function to read in the files and test it
+## Tidying the data
 
-```{r q2_file_function}
+```{r q2_tidy}
 
-import_function = function(file_name) {
+study_tidy_df = study_df %>%
+  separate(
+    file_name,
+    into = c("period", "path_1", "path_2", "arm_id"),
+    sep = "/") %>%
+  mutate(
+    arm_id = str_replace(arm_id, "\\.csv", "")
+  ) %>%
+  select(-c(period, path_1, path_2)) %>%
+  view()
   
-data_import = read_csv(file_name)
-
-return(data_import)
-  
-}
-
-import_function(study_df)
-
-
-
 ```
 
 
