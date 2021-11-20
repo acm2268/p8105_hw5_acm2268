@@ -49,7 +49,12 @@ homicide_df =
   filter(city_state != "TulsaAL") %>%
   view()
 
+skimr::skim(homicide_df)
+
 ```
+
+
+This dataset contains data on homicides in 50 cities in the US and was collected by the Washington Post. There are `r nrow(homicide_df)` rows of data and `r ncol(homicide_df) - 1` variables in the raw dataset. The specific variables included are `r names(homicide_df)`.
 
 ## Baltimore, MD
 
@@ -185,7 +190,7 @@ study_plot_df = study_tidy_df %>%
   ) %>%
   separate(
     arm_id_2,
-    into = c("arm", "participant_id"),
+    into = c("arm", "id"),
     sep = "_") %>%
   mutate(
     arm = case_when(
@@ -193,7 +198,7 @@ study_plot_df = study_tidy_df %>%
       arm == "exp" ~ "experimental"
     )
   ) %>%
-  relocate(arm_id, arm, participant_id) %>%
+  relocate(arm_id, arm, id) %>%
   pivot_longer(
     week_1:week_8,
     names_to = "week",
@@ -204,7 +209,7 @@ study_plot_df = study_tidy_df %>%
     week = as.numeric(week)
   )
 
-ggplot(study_plot_df, aes(x = week, y = observations, color = participant_id)) +
+ggplot(study_plot_df, aes(x = week, y = observations, color = id)) +
   geom_line() + 
   facet_grid(. ~ arm) +
   theme(legend.position = "right") +
@@ -212,10 +217,48 @@ ggplot(study_plot_df, aes(x = week, y = observations, color = participant_id)) +
 
 ```
 
+The observations for the control group fluctuated between around 4 and -3 during the 8 weeks of observation. There was not much change in the pattern of observations over time. For the experimental arm however, the observations increased over the 8 weeks of observation. The observations for the control group ranged around -1 to 3.75 during the first week and ranged from around 3.5 to 7 by week 8. 
 
 
+# Question 3
 
+## Loading in iris data
 
+```{r q3_load_data}
+
+library(tidyverse)
+
+set.seed(10)
+
+iris_with_missing = iris %>% 
+  map_df(~replace(.x, sample(1:150, 20), NA)) %>%
+  mutate(Species = as.character(Species)) %>%
+  janitor::clean_names()
+
+```
+
+## Writing the function and iterating across dataset
+
+```{r q3_function}
+
+replace_missing = function(x) {
+  
+  if (is.numeric(x)) {
+    vector = replace(x, is.na(x), mean(x, na.rm = TRUE))
+    return(vector)
+  }
+  
+  if (is.character(x)) {
+    vector = replace(x, is.na(x), "virginica")
+    return(vector)
+    }
+  }
+
+iris_no_missing = map_dfc(iris_with_missing, replace_missing)
+
+view(iris_no_missing)
+
+```
 
 
 
