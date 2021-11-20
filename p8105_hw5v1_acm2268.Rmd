@@ -158,26 +158,59 @@ study_df =
 
 ```
 
-## Write a function to read in the files and test it
+## Tidying the data
 
-```{r q2_file_function}
+```{r q2_tidy}
 
-import_function = function(file_name) {
+study_tidy_df = study_df %>%
+  separate(
+    file_name,
+    into = c("period", "path_1", "path_2", "arm_id"),
+    sep = "/") %>%
+  mutate(
+    arm_id = str_replace(arm_id, "\\.csv", "")
+  ) %>%
+  select(-c(period, path_1, path_2)) %>%
+  view()
   
-data_import = read_csv(file_name)
-
-return(data_import)
-  
-}
-
-import_function(study_df)
-
-
-
 ```
 
+## Additional tidying and spaghetti plot of participants over time
 
+```{r q2_plot}
 
+study_plot_df = study_tidy_df %>%
+  mutate(
+   arm_id_2 = arm_id
+  ) %>%
+  separate(
+    arm_id_2,
+    into = c("arm", "participant_id"),
+    sep = "_") %>%
+  mutate(
+    arm = case_when(
+      arm == "con" ~ "control",
+      arm == "exp" ~ "experimental"
+    )
+  ) %>%
+  relocate(arm_id, arm, participant_id) %>%
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    values_to = "observations"
+  ) %>%
+  mutate(
+    week = str_replace(week, "week_", ""),
+    week = as.numeric(week)
+  )
+
+ggplot(study_plot_df, aes(x = week, y = observations, color = participant_id)) +
+  geom_line() + 
+  facet_grid(. ~ arm) +
+  theme(legend.position = "right") +
+  labs(x = "Week", y = "Subject Observations", title = "Subject Observations over Time by Arm")
+
+```
 
 
 
