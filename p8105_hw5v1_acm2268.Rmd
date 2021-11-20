@@ -217,7 +217,7 @@ ggplot(study_plot_df, aes(x = week, y = observations, color = id)) +
 
 ```
 
-The observations for the control group fluctuated between around 4 and -3 during the 8 weeks of observation. There was not much change in the pattern of observations over time. For the experimental arm however, the observations increased over the 8 weeks of observation. The observations for the control group ranged around -1 to 3.75 during the first week and ranged from around 3.5 to 7 by week 8. 
+While the observations for the control group fluctuated some each week, overall, the trend stayed the same over time and ranged between around -3 and 4 during the 8 weeks of observation. In contrast, the observations for the experimental arm increased over the 8 week observation period, with observations ranging between approximately -1 to 3.75 during the first week and between approximately 3.5 to 7 during the eith week.
 
 
 # Question 3
@@ -259,19 +259,6 @@ iris_no_missing = map_dfc(iris_with_missing, replace_missing)
 view(iris_no_missing)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
