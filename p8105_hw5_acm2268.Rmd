@@ -101,8 +101,6 @@ return(city_test)
 
 prop_test_function(baltimore_df)
 
-hom
-
 
 ```
 
@@ -112,16 +110,20 @@ First, create a city-specific data frame using the nest function.
 
 ```{r q1_city_iteration}
 
-nested_df = homicide_df %>%
+results_df = homicide_df %>%
   nest(data = uid:resolution) %>%
   mutate(
-    test_results = map(data, prop_test_function)
+    test_results = map(data, prop_test_function),
+    tidy_results = map(test_results, broom::tidy)
   ) %>%
+  select(city_state, tidy_results) %>%
+  unnest(tidy_results) %>%
+  select(city_state, estimate, starts_with("conf")) %>%
   view()
 
-nested_df %>%
+results_df %>%
   filter(city_state == "BaltimoreMD") %>%
-  pull(data)
+  pull(tidy_results)
 
 ```
 
